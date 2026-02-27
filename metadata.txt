@@ -7,11 +7,11 @@ description[es]=Resuelve problemas de codificación de caracteres al convertir d
 about=Multi-Encode Vector Converter is a QGIS plugin designed to solve character encoding issues (e.g., garbled special characters or accents) when converting vector data, such as Shapefiles, to GeoPackage (GPKG), ensuring safe data integration. It allows you to preview attribute data before conversion, specify the correct encoding from a wide range of standard Python encodings (e.g., UTF-8, Windows-1252, ISO-8859-1), and output a standard UTF-8 GeoPackage. It also supports joining external CSV files with different encodings during the conversion process.
 about[ja]=Multi-Encode Vector Converter は、シェープファイル（Shapefile）などのベクタデータを GeoPackage (GPKG) に変換する際、文字化け（エンコーディング）の問題を解決し、安全に統合するための QGIS プラグインです。変換前に属性データのプレビューを行い、Pythonがサポートする多くの標準エンコーディング（Shift_JIS, CP932, UTF-8, EUC-JPなど）から正しいものを指定して、標準的な UTF-8 の GeoPackage に変換・出力します。また、異なるエンコーディングを持つ CSV ファイルを結合して変換することも可能です。
 about[es]=Multi-Encode Vector Converter es un complemento de QGIS diseñado para resolver problemas de codificación de caracteres (mojibake) al convertir datos vectoriales, como Shapefiles, a GeoPackage (GPKG), garantizando una integración segura de los datos. Permite previsualizar los datos de atributos antes de la conversión, especificar la codificación correcta de entre una amplia gama de codificaciones estándar de Python (p. ej., UTF-8, ISO-8859-1, Windows-1252) y generar un GeoPackage estándar en UTF-8. También admite la unión de archivos CSV externos con diferentes codificaciones durante el proceso de conversión.
-version=0.1
+version=0.1.0
 author=Hideharu Masai
 email=hideharumasai@void.mints.ne.jp
 changelog=
-    0.1: Initial release
+    0.1.0: Initial release
 category=Vector
 tags=vector,encoding,geopackage,conversion,csv,join,utf-8,shift_jis,cp932,mojibake
 repository=https://github.com/raw-slnc/Multi-Encode-Vector-Converter
