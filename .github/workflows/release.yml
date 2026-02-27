@@ -1,0 +1,49 @@
+name: Release QGIS Plugin ZIP
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from metadata.txt
+        id: meta
+        run: |
+          VERSION=$(grep '^version=' metadata.txt | cut -d'=' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create plugin ZIP
+        run: |
+          PLUGIN_NAME="multi_encode_vector_converter"
+          ZIP_NAME="${PLUGIN_NAME}_${{ steps.meta.outputs.version }}.zip"
+
+          # Stage files into a correctly named folder
+          mkdir -p /tmp/pkg/${PLUGIN_NAME}
+          rsync -av --exclude='.git' \
+                    --exclude='.github' \
+                    --exclude='__pycache__' \
+                    --exclude='*.pyc' \
+                    --exclude='*.pyo' \
+                    --exclude='.gitignore' \
+                    ./ /tmp/pkg/${PLUGIN_NAME}/
+
+          cd /tmp/pkg
+          zip -r ${ZIP_NAME} ${PLUGIN_NAME}/
+          mv ${ZIP_NAME} $GITHUB_WORKSPACE/
+
+          echo "ZIP_NAME=${ZIP_NAME}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release and upload ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true

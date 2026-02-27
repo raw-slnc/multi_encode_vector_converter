@@ -419,6 +419,13 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
             return
 
         for layer in layers:
+            if not isinstance(layer, QgsVectorLayer):
+                continue
+            if layer.providerType() == "delimitedtext":
+                continue
+            src = layer.source().lower().split("|")[0].split("?")[0].strip()
+            if src.endswith(".csv") or src.endswith(".tsv") or src.endswith(".txt"):
+                continue
             for cb in (self.cb_layer, self.cb_layer_csv):
                 cb.addItem(layer.name(), layer.id())
 
