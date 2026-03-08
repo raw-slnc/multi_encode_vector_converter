@@ -173,7 +173,7 @@ GNU General Public License v2.0 or later.
 
 ## サポート
 
-このプラグインがお役に立てている場合は、開発を応援していただけると嬉しいです:
+開発を応援していただけると嬉しいです。
 https://paypal.me/rawslnc
 
 ## 作者
