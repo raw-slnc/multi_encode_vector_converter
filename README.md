@@ -50,6 +50,11 @@ This plugin assists in migrating to GPKG and normalizing data. It cannot restore
 
 GNU General Public License v2.0 or later.
 
+## Support
+
+If this plugin is helpful for your work, you can support the development here:
+https://paypal.me/rawslnc
+
 ## Author
 
 (C) 2026 by Hideharu Masai
@@ -107,6 +112,11 @@ Este complemento ayuda en la migración a GPKG y la normalización de datos. No 
 
 GNU General Public License v2.0 o posterior.
 
+## Soporte
+
+Si este complemento es útil para tu trabajo, puedes apoyar el desarrollo aquí:
+https://paypal.me/rawslnc
+
 ## Autor
 
 (C) 2026 por Hideharu Masai
@@ -160,6 +170,11 @@ GNU General Public License v2.0 o posterior.
 ## ライセンス
 
 GNU General Public License v2.0 or later.
+
+## サポート
+
+このプラグインがお役に立てている場合は、開発を応援していただけると嬉しいです:
+https://paypal.me/rawslnc
 
 ## 作者
 
