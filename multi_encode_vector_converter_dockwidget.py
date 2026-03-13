@@ -25,7 +25,7 @@ import os
 import csv
 
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtCore import QCoreApplication, Qt, QVariant, pyqtSignal, QSettings, QTranslator
+from qgis.PyQt.QtCore import QCoreApplication, Qt, QVariant, pyqtSignal, QSettings, QTranslator, QThread, QObject, pyqtSlot
 from qgis.PyQt.QtWidgets import (
     QWidget,
     QGroupBox,
@@ -41,6 +41,7 @@ from qgis.PyQt.QtWidgets import (
     QStackedWidget,
     QSizePolicy,
     QMessageBox,
+    QProgressBar,
 )
 from qgis.core import (
     QgsProject,
@@ -52,6 +53,24 @@ from qgis.core import (
     QgsFeature,
     QgsWkbTypes,
 )
+
+
+class _ConversionWorker(QObject):
+    """Runs the conversion on a background thread and emits the result."""
+    finished = pyqtSignal(bool, str)  # ok, message
+
+    def __init__(self, fn, path):
+        super().__init__()
+        self._fn = fn
+        self._path = path
+
+    @pyqtSlot()
+    def run(self):
+        try:
+            ok, msg = self._fn(self._path)
+        except Exception as e:
+            ok, msg = False, str(e)
+        self.finished.emit(ok, msg)
 
 
 class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
@@ -287,6 +306,11 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
         self.btn_execute = QPushButton(self.tr("Execute"))
         self.btn_execute.clicked.connect(self._on_execute_clicked)
         layout_c.addWidget(self.btn_execute)
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 0)  # indeterminate pulsing
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setVisible(False)
+        layout_c.addWidget(self.progress_bar)
         group_c.setLayout(layout_c)
         layout.addWidget(group_c)
 
@@ -335,6 +359,10 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
         QgsProject.instance().layersRemoved.connect(self._refresh_layer_list)
 
         self.cb_language.currentIndexChanged.connect(self._on_language_changed)
+
+        self._thread = None
+        self._worker = None
+        self._pending_output_path = ""
 
         self._refresh_layer_list()
         self._update_input_mode()
@@ -1066,6 +1094,43 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
 
     # ── Execute ───────────────────────────────────────────────────────
 
+    def _warn_if_crs_unknown(self):
+        """Show a warning dialog if the source layer has no defined CRS."""
+        crs = None
+        if self.rb_shp.isChecked():
+            shp_path = self.le_shp_path.text().strip()
+            if shp_path:
+                tmp = QgsVectorLayer(shp_path, "_crs_check", "ogr")
+                if tmp.isValid():
+                    crs = tmp.crs()
+        elif self.rb_layer.isChecked() or self.rb_layer_csv.isChecked():
+            layer = (
+                self._get_selected_layer()
+                if self.rb_layer.isChecked()
+                else self._get_selected_layer_csv()
+            )
+            if layer:
+                src = layer.source().split("|")[0].strip()
+                if src.lower().endswith(".shp") and os.path.isfile(src):
+                    tmp = QgsVectorLayer(src, "_crs_check", "ogr")
+                    if tmp.isValid():
+                        crs = tmp.crs()
+                else:
+                    crs = layer.crs()
+
+        if crs is not None and not crs.isValid():
+            QMessageBox.warning(
+                self,
+                self.tr("CRS Undefined"),
+                self.tr(
+                    "The source file has no CRS (coordinate reference system) defined.\n\n"
+                    "The conversion will proceed, but the output layer may not display "
+                    "correctly on the map.\n\n"
+                    "After conversion, right-click the output layer → "
+                    "\"Set Layer CRS\" and select the correct CRS manually."
+                ),
+            )
+
     def _on_execute_clicked(self):
         """Validate, confirm, convert, and load result into QGIS."""
         if not self._validate_inputs():
@@ -1077,18 +1142,6 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
                 self.tr("Result: Execution canceled (no output selected).")
             )
             return
-
-        if os.path.exists(output_path):
-            answer = QMessageBox.question(
-                self,
-                self.tr("Overwrite Confirmation"),
-                self.tr("Output file already exists. Overwrite?"),
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
-            )
-            if answer != QMessageBox.Yes:
-                self.lbl_result_summary.setText(self.tr("Result: Execution canceled by user."))
-                return
 
         if self.rb_layer.isChecked():
             layer = self._get_selected_layer()
@@ -1105,12 +1158,43 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
                 )
                 return
 
-        ok, msg = self._do_convert(output_path)
+        # Warn if source CRS is undefined
+        self._warn_if_crs_unknown()
+
+        self._pending_output_path = output_path
+
+        # Switch UI to progress mode
+        self.btn_execute.setVisible(False)
+        self.progress_bar.setVisible(True)
+        self.lbl_result_summary.setText(self.tr("Result: Converting..."))
+
+        # Run conversion on a background thread
+        self._thread = QThread()
+        self._worker = _ConversionWorker(self._do_convert, output_path)
+        self._worker.moveToThread(self._thread)
+        self._thread.started.connect(self._worker.run)
+        self._worker.finished.connect(self._on_conversion_done)
+        self._worker.finished.connect(self._thread.quit)
+        self._worker.finished.connect(self._worker.deleteLater)
+        self._thread.finished.connect(self._thread.deleteLater)
+        self._thread.start()
+
+    def _on_conversion_done(self, ok, msg):
+        """Called on the main thread when the background conversion finishes."""
+        self.progress_bar.setVisible(False)
+        self.btn_execute.setVisible(True)
         self.lbl_result_summary.setText(self.tr("Result: {}").format(msg))
+        output_path = self._pending_output_path
         if ok:
-            layer_name = os.path.splitext(os.path.basename(output_path))[0]
+            # Use the actual internal layer name from the GPKG (not the output filename)
+            tmp = QgsVectorLayer(output_path, "tmp", "ogr")
+            if tmp.isValid():
+                internal_name = tmp.name()
+                del tmp
+            else:
+                internal_name = os.path.splitext(os.path.basename(output_path))[0]
             result_layer = QgsVectorLayer(
-                "{}|layername={}".format(output_path, layer_name), layer_name, "ogr"
+                "{}|layername={}".format(output_path, internal_name), internal_name, "ogr"
             )
             if result_layer.isValid():
                 QgsProject.instance().addMapLayer(result_layer)

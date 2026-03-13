@@ -357,5 +357,25 @@ as informações já perdidas por limites de formato legado ou conversões irrev
         <source>Write error (code {}): {}</source>
         <translation>Erro de escrita (código {}): {}</translation>
     </message>
+    <message>
+        <source>Result: Converting...</source>
+        <translation>Resultado: Convertendo...</translation>
+    </message>
+    <message>
+        <source>CRS Undefined</source>
+        <translation>CRS não definido</translation>
+    </message>
+    <message>
+        <source>The source file has no CRS (coordinate reference system) defined.
+
+The conversion will proceed, but the output layer may not display correctly on the map.
+
+After conversion, right-click the output layer → &quot;Set Layer CRS&quot; and select the correct CRS manually.</source>
+        <translation>O arquivo de origem não tem CRS (sistema de referência de coordenadas) definido.
+
+A conversão prosseguirá, mas a camada de saída pode não ser exibida corretamente no mapa.
+
+Após a conversão, clique com o botão direito na camada de saída → &quot;Definir CRS da camada&quot; e selecione o CRS correto manualmente.</translation>
+    </message>
 </context>
 </TS>

@@ -356,5 +356,25 @@ GPKG処理は一時的な緩和措置であり、
         <source>Write error (code {}): {}</source>
         <translation>書き込みエラー (コード {}): {}</translation>
     </message>
+    <message>
+        <source>Result: Converting...</source>
+        <translation>変換中...</translation>
+    </message>
+    <message>
+        <source>CRS Undefined</source>
+        <translation>CRS 未定義</translation>
+    </message>
+    <message>
+        <source>The source file has no CRS (coordinate reference system) defined.
+
+The conversion will proceed, but the output layer may not display correctly on the map.
+
+After conversion, right-click the output layer → &quot;Set Layer CRS&quot; and select the correct CRS manually.</source>
+        <translation>ソースファイルに CRS（座標参照系）が定義されていません。
+
+変換は続行されますが、出力レイヤーが地図上に正しく表示されない場合があります。
+
+変換後、出力レイヤーを右クリック →「レイヤーの CRS を設定」から正しい CRS を手動で設定してください。</translation>
+    </message>
 </context>
 </TS>
