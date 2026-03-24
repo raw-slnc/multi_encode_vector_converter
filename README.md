@@ -46,18 +46,18 @@ This plugin assists in migrating to GPKG and normalizing data. It cannot restore
 
 *   QGIS 3.x
 
-## License
-
-GNU General Public License v2.0 or later.
-
 ## Support
 
 If this plugin is helpful for your work, you can support the development here:
 https://paypal.me/rawslnc
 
+## License
+
+GNU General Public License v2 or later.
+
 ## Author
 
-(C) 2026 by Hideharu Masai
+Copyright (C) 2026 Hideharu Masai
 
 ---
 
@@ -108,18 +108,18 @@ Este complemento ayuda en la migración a GPKG y la normalización de datos. No 
 
 *   QGIS 3.x
 
-## Licencia
-
-GNU General Public License v2.0 o posterior.
-
 ## Soporte
 
 Si este complemento es útil para tu trabajo, puedes apoyar el desarrollo aquí:
 https://paypal.me/rawslnc
 
+## Licencia
+
+GNU General Public License v2 o posterior.
+
 ## Autor
 
-(C) 2026 por Hideharu Masai
+Copyright (C) 2026 Hideharu Masai
 
 ---
 
@@ -167,15 +167,15 @@ https://paypal.me/rawslnc
 
 *   QGIS 3.x
 
-## ライセンス
-
-GNU General Public License v2.0 or later.
-
 ## サポート
 
 開発を応援していただけると嬉しいです。
 https://paypal.me/rawslnc
 
+## ライセンス
+
+GNU General Public License v2 以降
+
 ## 作者
 
-(C) 2026 by Hideharu Masai
+Copyright (C) 2026 Hideharu Masai
