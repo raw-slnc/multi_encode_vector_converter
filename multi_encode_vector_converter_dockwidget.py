@@ -1189,7 +1189,7 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
             # Use the actual internal layer name from the GPKG (not the output filename)
             tmp = QgsVectorLayer(output_path, "tmp", "ogr")
             if tmp.isValid():
-                internal_name = tmp.name()
+                internal_name = tmp.dataProvider().uri().table()
                 del tmp
             else:
                 internal_name = os.path.splitext(os.path.basename(output_path))[0]
@@ -1267,8 +1267,8 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
 
                 # Filter the fields to be merged based on the join subset.
                 # joinFieldNamesSubset() returns the original CSV column names (no prefix).
-                # None means all fields are joined.
-                if join_fields_subset is not None:
+                # None or empty list means all fields are joined.
+                if join_fields_subset:
                     subset_set = set(join_fields_subset)
                     fields_to_merge = [f for f in all_csv_extra_fields if f in subset_set]
                 else:
@@ -1500,8 +1500,8 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
         mem.updateExtents()
         return mem
 
-    @staticmethod
-    def _flatten_to_memory(layer):
+    @classmethod
+    def _flatten_to_memory(cls, layer):
         """Copy layer (including virtual join fields) to a memory layer."""
         geom_str = QgsWkbTypes.displayString(layer.wkbType())
         crs = layer.crs().authid()
@@ -1509,8 +1509,16 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
         if not mem.isValid():
             return None
 
+        used_names = set()
+        safe_fields = []
+        for field in layer.fields():
+            safe_name = cls._safe_gpkg_name(field.name(), used_names)
+            new_field = QgsField(field)
+            new_field.setName(safe_name)
+            safe_fields.append(new_field)
+
         pr = mem.dataProvider()
-        pr.addAttributes(list(layer.fields()))
+        pr.addAttributes(safe_fields)
         mem.updateFields()
 
         new_feats = []
