@@ -1343,7 +1343,7 @@ class MultiEncodeVectorConverterDockWidget(QtWidgets.QDockWidget):
                 if path.startswith("/") and len(path) > 2 and path[2] == ":":
                     path = path[1:]
                 return path if os.path.isfile(path) else None
-            except Exception:
+            except Exception:  # nosec B110
                 pass
         base = source.split("|")[0].strip()
         return base if os.path.isfile(base) else None
